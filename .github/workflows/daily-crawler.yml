@@ -1,0 +1,41 @@
+name: Daily AI+WiFi Literature Crawler
+
+on:
+  schedule:
+    # 每天UTC时间 08:00 运行（可根据需要调整）
+    - cron: '0 8 * * *'
+  
+  # 允许手动触发
+  workflow_dispatch:
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run crawler
+        run: python3 crawler.py
+      
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "bot@github.com"
+          git config --local user.name "AI Research Bot"
+          git add -A
+          git commit -m "daily: update AI+WiFi research literature - $(date +%Y-%m-%d)" || true
+          git push
